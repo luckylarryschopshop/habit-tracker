@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html style='background:#121212;color:#eee;font-family:sans-serif'>
+<head><title>Habit Tracker</title></head>
+<body>
+  <h1 style='text-align:center'>Habit Tracker</h1>
+  <form style='max-width:400px;margin:20px auto'>
+    <input placeholder='New habit' required>
+    <button type='submit'>Add</button>
+  </form>
+  <div id='habits' style='max-width:400px;margin:0 auto'></div>
+  <div id='weekly' style='display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:20px auto'></div>
+  <script>
+    const form = document.querySelector('form');
+    const habitsDiv = document.getElementById('habits');
+    const weeklyDiv = document.getElementById('weekly');
+    
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = form.querySelector('input').value;
+      addHabit(name);
+      form.reset();
+    });
+    
+    function addHabit(name) {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input type='checkbox'> ${name}
+        <div style='margin:5px 0'>Streak: <span id='streak'>0</span></div>
+        <div style='width:100%;background:#444;height:10px;position:relative'>
+          <div style='height:100%;background:var(--color);width:0%' id='bar'></div>
+        </div>
+      `;
+      habitsDiv.appendChild(div);
+    }
+    
+    for(let i=0; i<7; i++) {
+      const day = document.createElement('div');
+      day.textContent = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i];
+      weeklyDiv.appendChild(day);
+    }
+  </script>
+</body>
+</html>
