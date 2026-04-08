@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html style="background:#0d1117;color:#e6edf3;font-family:sans-serif">
+<head><title>Habit Tracker</title></head>
+<body>
+  <h1>Daily Habit Tracker</h1>
+  <div id="app">
+    <form id="add-form">
+      <input id="habit-input" placeholder="New habit" required>
+      <button type="submit">Add</button>
+    </form>
+    <div id="habit-list"></div>
+    <div id="empty" style="display:none">No habits yet. Add one above!</div>
+  </div>
+  <script>
+    const api = '/api/habit_tracker';
+    let habits = [];
+
+    async function fetchHabits() {
+      try {
+        const res = await fetch(api);
+        habits = await res.json();
+        render();
+      } catch (e) { alert('Failed to load habits'); }
+    }
+
+    document.getElementById('add-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('habit-input').value;
+      await fetch(api, { method: 'POST', body: JSON.stringify({ name }) });
+      fetchHabits();
+    });
+
+    async function updateHabit(id, updates) {
+      await fetch(`${api}/${id}`, { method: 'PUT', body: JSON.stringify(updates) });
+      fetchHabits();
+    }
+
+    function render() {
+      const list = document.getElementById('habit-list');
+      list.innerHTML = '';
+      if (habits.length === 0) {
+        document.getElementById('empty').style.display = 'block';
+        return;
+      }
+      document.getElementById('empty').style.display = 'none';
+
+      habits.forEach(h => {
+        const div = document.createElement('div');
+        div.style.margin='10px 0';
+        div.innerHTML = `
+          <input type="checkbox" ${h.completed ? 'checked' : ''} onchange="updateHabit(${h.id}, {completed: this.checked})">
+          <span style="margin-left:10px">${h.name}</span>
+          <span style="color:#f97316;margin-left:10px">Streak: ${h.streak}</span>
+          <button onclick="updateHabit(${h.id}, {name: prompt('Edit habit:', '${h.name}')})">Edit</button>
+          <button onclick="fetch('${api}/${h.id}', {method:'DELETE'}); fetchHabits()">Delete</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    fetchHabits();
+  </script>
+</body>
+</html>
